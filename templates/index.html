@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<title>SSE Test</title>
+
+<h1>Server sent events</h1>
+<div id="event">...</div>
+<br>
+
+<input placeholder="Message">
+
+<script>
+  const eventOutputContainer = document.getElementById('event');
+  const evtSrc = new EventSource('/subscribe');
+  evtSrc.onmessage = evt => {
+    eventOutputContainer.innerHTML = evt.data;
+  };
+
+  const input = document.querySelector('input');
+  input.addEventListener('keydown', async evt => {
+    if (evt.key === 'Enter') {
+      const msg = input.value;
+      const formData = new FormData();
+      formData.append('msg', msg);
+      input.disabled = true;
+      await fetch('/publish', {
+        method: 'POST',
+        body: formData,
+      });
+      input.value = '';
+      input.disabled = false;
+    }
+  });
+</script>
