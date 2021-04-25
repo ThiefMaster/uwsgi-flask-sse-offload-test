@@ -1,4 +1,4 @@
-from redis import StrictRedis
+from redis import RedisError, StrictRedis
 
 redis = StrictRedis('localhost', 6379, db=0)
 
@@ -30,6 +30,10 @@ def application(environ, start_response):
                     continue
                 data = msg['data'].decode()
                 yield _sse('message', data)
+            except RedisError as exc:
+                # SSE clients reconnect, so we don't need to try to recover
+                print(f'Redis error: {exc}')
+                break
             except GeneratorExit:
                 break
     print(f'{ip} disconnected')
